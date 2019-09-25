@@ -21,6 +21,7 @@ import pandas as pd
 from hops import constants, util
 from hops.featurestore_impl.dao.common.featurestore_metadata import FeaturestoreMetadata
 from hops.featurestore_impl.dao.stats.statistics import Statistics
+from hops.featurestore_impl.dao.storageconnectors.jdbc_connector import JDBCStorageConnector
 from hops.featurestore_impl.exceptions.exceptions import FeaturegroupNotFound, TrainingDatasetNotFound, \
     FeatureDistributionsNotComputed, \
     FeatureCorrelationsNotComputed, FeatureClustersNotComputed, DescriptiveStatisticsNotComputed, \
@@ -702,6 +703,19 @@ def _do_get_training_dataset_statistics(training_dataset_name, featurestore=None
     features_histogram_json = response_object.get(constants.REST_CONFIG.JSON_FEATUREGROUP_FEATURES_HISTOGRAM)
     feature_clusters = response_object.get(constants.REST_CONFIG.JSON_FEATUREGROUP_FEATURES_CLUSTERS)
     return Statistics(descriptive_stats_json, correlation_matrix_json, features_histogram_json, feature_clusters)
+
+
+def _do_get_online_featurestore_connector(featurestore):
+    """
+    Gets the JDBC connector for the online featurestore
+    Args:
+        :featurestore: the featurestore name
+    Returns:
+        a JDBC connector DTO object for the online featurestore
+    """
+    featurestore_id = _get_featurestore_id(featurestore)
+    response_object = rest_rpc._get_online_featurestore_jdbc_connector_rest(featurestore_id)
+    return JDBCStorageConnector(response_object)
 
 
 # Fetch on-load and cache it on the client
